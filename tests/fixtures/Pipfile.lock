@@ -1,0 +1,18 @@
+{
+    "_meta": {
+        "pipfile-spec": 6,
+        "sources": [
+            {"name": "public", "url": "https://pypi.org/simple", "verify_ssl": true},
+            {"name": "pypi", "url": "https://packages.example.com/simple", "verify_ssl": true}
+        ]
+    },
+    "default": {
+        "requests": {"index": "public", "version": "==2.32.3"},
+        "mylib": {"path": ".", "editable": true},
+        "tool": {"git": "https://example.com/x/tool.git", "ref": "abc123"},
+        "internal": {"index": "pypi", "version": "==1.0.0"}
+    },
+    "develop": {
+        "pytest": {"version": "==8.3.3"}
+    }
+}

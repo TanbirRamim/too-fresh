@@ -35,7 +35,7 @@ Exit code is 1 when something is too fresh, 0 when it's all fine, 2 when it foun
 | `pnpm-lock.yaml` (v5 to v9) | npm |
 | `yarn.lock` (classic and berry) | npm |
 | `bun.lock` | npm |
-| `uv.lock`, `poetry.lock`, `requirements*.txt` (pinned `==` lines) | PyPI |
+| `uv.lock`, `poetry.lock`, `Pipfile.lock` (`default` and `develop`), `requirements*.txt` (pinned `==` lines) | PyPI |
 | `Cargo.lock` | crates.io |
 | `go.sum` | proxy.golang.org |
 | `composer.lock` | Packagist (path repos and `dev-` branches skipped) |

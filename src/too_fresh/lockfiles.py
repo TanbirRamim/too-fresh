@@ -10,6 +10,7 @@ import tempfile
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlsplit
 
 
 @dataclass(frozen=True)
@@ -159,6 +160,28 @@ def parse_poetry_lock(path: Path) -> list[Dep]:
     return out
 
 
+def parse_pipfile_lock(path: Path) -> list[Dep]:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    sources = data.get("_meta", {}).get("sources", [])
+    default_index = sources[0]["name"] if sources else "pypi"
+    # A source URL may be missing or use ${ENV_VAR} placeholders; treat those as private indexes.
+    pypi_indexes = {
+        source.get("name") for source in sources
+        if urlsplit(source.get("url") or "").hostname in {"pypi.org", "pypi.python.org"}
+    } if sources else {"pypi"}
+    out = []
+    for group in ("default", "develop"):
+        for name, package in data.get(group, {}).items():
+            if package.get("index", default_index) not in pypi_indexes:
+                continue
+            if any(key in package for key in ("path", "file", "git", "hg", "svn", "bzr")):
+                continue
+            version = package.get("version", "")
+            if version.startswith("==") and len(version) > 2:
+                out.append(Dep("pypi", name, version[2:], str(path)))
+    return out
+
+
 def parse_requirements(path: Path) -> list[Dep]:
     out = []
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -233,6 +256,7 @@ PARSERS = {
     "bun.lock": parse_bun_lock,
     "uv.lock": parse_uv_lock,
     "poetry.lock": parse_poetry_lock,
+    "Pipfile.lock": parse_pipfile_lock,
     "Cargo.lock": parse_cargo_lock,
     "go.sum": parse_go_sum,
     "composer.lock": parse_composer_lock,

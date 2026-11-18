@@ -63,6 +63,30 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(names(lf.parse_requirements(FX / "requirements.txt")), [
             ("pypi", "Django", "5.1.2"), ("pypi", "uvicorn", "0.30.0")])
 
+    def test_pipfile_lock(self):
+        path = FX / "Pipfile.lock"
+        deps, errors = lf.collect([path])
+        self.assertEqual(errors, [])
+        self.assertEqual(names(deps), [("pypi", "pytest", "8.3.3"), ("pypi", "requests", "2.32.3")])
+        self.assertTrue(all(dep.source == str(path) for dep in deps))
+
+    def test_pipfile_lock_tolerates_env_var_and_missing_urls(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "Pipfile.lock"
+            path.write_text(json.dumps({
+                "_meta": {"sources": [
+                    {"name": "pypi", "url": "https://pypi.org/simple"},
+                    {"name": "corp", "url": "https://${CORP_INDEX_HOST}/simple"},
+                    {"name": "broken"},
+                ]},
+                "default": {
+                    "attrs": {"version": "==24.2.0"},
+                    "secret": {"index": "corp", "version": "==1.0.0"},
+                    "other": {"index": "broken", "version": "==2.0.0"},
+                },
+            }), encoding="utf-8")
+            self.assertEqual(names(lf.parse_pipfile_lock(path)), [("pypi", "attrs", "24.2.0")])
+
     def test_cargo_and_go(self):
         self.assertEqual(names(lf.parse_cargo_lock(FX / "Cargo.lock")), [("crates", "serde", "1.0.210")])
         self.assertEqual(names(lf.parse_go_sum(FX / "go.sum")), [("go", "github.com/BurntSushi/toml", "v1.4.0")])
