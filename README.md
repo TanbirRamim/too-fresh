@@ -113,4 +113,4 @@ Plain Python standard library, no dependencies, so there's not much to audit. It
 python3 -m unittest discover -s tests
 ```
 
-MIT licensed. Issues and PRs welcome, especially lockfile formats I missed (composer.lock and Gemfile.lock are next).
+MIT licensed. Issues and PRs welcome, especially lockfile formats I missed. See [CONTRIBUTING.md](CONTRIBUTING.md) and the [good first issues](https://github.com/TanbirRamim/too-fresh/labels/good%20first%20issue).
